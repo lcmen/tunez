@@ -1,5 +1,6 @@
 defmodule Tunez.Music.Artist do
   use Ash.Resource, otp_app: :tunez, domain: Tunez.Music, data_layer: AshPostgres.DataLayer
+  require Ash.Sort
 
   postgres do
     table "artists"
@@ -23,6 +24,23 @@ defmodule Tunez.Music.Artist do
 
     update :update do
       accept [:name, :biography]
+
+      require_atomic? false
+
+      # change fn changeset, _context ->
+      #          new_name = Ash.Changeset.get_attribute(changeset, :name)
+      #          previous_name = Ash.Changeset.get_data(changeset, :name)
+      #          previous_names = Ash.Changeset.get_data(changeset, :previous_names)
+
+      #          names =
+      #            [previous_name | previous_names]
+      #            |> Enum.reject(&(&1 == new_name))
+      #            |> Enum.uniq()
+
+      #          Ash.Changeset.change_attribute(changeset, :previous_names, names)
+      #        end,
+      #        where: [changing(:name)]
+      change Tunez.Music.Changes.UpdatePreviousNames, where: [changing(:name)]
     end
 
     destroy :destroy
@@ -38,9 +56,17 @@ defmodule Tunez.Music.Artist do
       allow_nil? false
     end
 
+    attribute :previous_names, {:array, :string} do
+      default []
+    end
+
     attribute :biography, :string
 
     create_timestamp :created_at
     update_timestamp :updated_at
+  end
+
+  relationships do
+    has_many :albums, Tunez.Music.Album, sort: [year: :desc]
   end
 end
