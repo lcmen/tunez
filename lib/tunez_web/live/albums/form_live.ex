@@ -1,12 +1,13 @@
 defmodule TunezWeb.Albums.FormLive do
   use TunezWeb, :live_view
 
-  def mount(_params, _session, socket) do
-    form = %{}
+  def mount(params, _session, socket) do
+    {form, artist} = form_for(params)
 
     socket =
       socket
       |> assign(:form, to_form(form))
+      |> assign(:artist, artist)
       |> assign(:page_title, "New Album")
 
     {:ok, socket}
@@ -19,22 +20,15 @@ defmodule TunezWeb.Albums.FormLive do
         <.h1>{@page_title}</.h1>
       </.header>
 
-      <.simple_form
-        :let={form}
-        id="album_form"
-        as={:form}
-        for={@form}
-        phx-change="validate"
-        phx-submit="save"
-      >
+      <.simple_form :let={form} id="album_form" as={:form} for={@form} phx-change="validate" phx-submit="save" >
         <.input name="artist_id" label="Artist" value="" disabled />
         <div class="sm:flex gap-8 space-y-8 md:space-y-0">
           <div class="sm:w-3/4"><.input field={form[:name]} label="Name" /></div>
           <div class="sm:w-1/4">
-            <.input field={form[:year_released]} label="Year Released" type="number" />
+            <.input field={form[:year]} label="Year" type="number" />
           </div>
         </div>
-        <.input field={form[:cover_image_url]} label="Cover Image URL" />
+        <.input field={form[:image_url]} label="Cover Image URL" />
 
         <:actions>
           <.button type="primary">Save</.button>
@@ -93,11 +87,25 @@ defmodule TunezWeb.Albums.FormLive do
     """
   end
 
-  def handle_event("validate", %{"form" => _form_data}, socket) do
+  def handle_event("validate", %{"form" => form_data}, socket) do
+    socket = update(socket, :form, &AshPhoenix.Form.validate(&1, form_data))
     {:noreply, socket}
   end
 
-  def handle_event("save", %{"form" => _form_data}, socket) do
+  def handle_event("save", %{"form" => form_data}, socket) do
+    socket =
+      case AshPhoenix.Form.submit(socket.assigns.form, params: form_data) do
+        {:ok, album} ->
+          socket
+          |> put_flash(:info, "Album saved successfully.")
+          |> push_navigate(to: "/artists/#{album.artist_id}")
+
+        {:error, form} ->
+          socket
+          |> assign(:form, form)
+          |> put_flash(:error, "Failed to save album.")
+      end
+
     {:noreply, socket}
   end
 
@@ -111,5 +119,23 @@ defmodule TunezWeb.Albums.FormLive do
 
   def handle_event("reorder-tracks", %{"order" => _order}, socket) do
     {:noreply, socket}
+  end
+
+  defp form_for(%{"id" => album_id}) do
+    album = Tunez.Music.read_album!(album_id, load: [:artist])
+    {Tunez.Music.form_to_update_album(album), album.artist}
+  end
+
+  defp form_for(%{"artist_id" => artist_id}) do
+    artist = Tunez.Music.read_artist!(artist_id)
+
+    form =
+      Tunez.Music.form_to_create_album(
+        transform_params: fn _form, params, _context ->
+          Map.put(params, "artist_id", artist.id)
+        end
+      )
+
+    {form, artist}
   end
 end

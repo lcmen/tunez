@@ -8,21 +8,11 @@ defmodule TunezWeb.Artists.ShowLive do
   end
 
   def handle_params(%{"id" => artist_id}, _url, socket) do
-    artist = Tunez.Music.read_artist!(artist_id)
-
-    albums = [
-      %{
-        id: "test-album-1",
-        name: "Test Album",
-        year_released: 2023,
-        cover_image_url: nil
-      }
-    ]
+    artist = Tunez.Music.read_artist!(artist_id, load: [:albums])
 
     socket =
       socket
       |> assign(:artist, artist)
-      |> assign(:albums, albums)
       |> assign(:page_title, artist.name)
 
     {:noreply, socket}
@@ -35,6 +25,9 @@ defmodule TunezWeb.Artists.ShowLive do
         <.h1>
           {@artist.name}
         </.h1>
+        <:subtitle :if={@artist.previous_names != []}>
+          Previously known as: {Enum.join(@artist.previous_names, ", ")}
+        </:subtitle>
         <:action>
           <.button_link
             kind="error"
@@ -58,7 +51,7 @@ defmodule TunezWeb.Artists.ShowLive do
       </.button_link>
 
       <ul class="mt-10 space-y-6 md:space-y-10">
-        <li :for={album <- @albums}>
+        <li :for={album <- @artist.albums}>
           <.album_details album={album} />
         </li>
       </ul>
@@ -70,12 +63,12 @@ defmodule TunezWeb.Artists.ShowLive do
     ~H"""
     <div id={"album-#{@album.id}"} class="md:flex gap-8 group">
       <div class="mx-auto mb-6 md:mb-0 w-2/3 md:w-72 lg:w-96">
-        <.cover_image image={@album.cover_image_url} />
+        <.cover_image image={@album.image_url} />
       </div>
       <div class="flex-1">
         <.header class="pl-3 pr-2 !m-0">
           <.h2>
-            {@album.name} ({@album.year_released})
+            {@album.name} ({@album.year})
           </.h2>
           <:action>
             <.button_link
@@ -138,12 +131,30 @@ defmodule TunezWeb.Artists.ShowLive do
     assigns = assign(assigns, :event, event)
 
     ~H"""
-    <span phx-click={@event} class="ml-3 inline-block">
-      <.icon
-        name={if @on, do: "hero-star-solid", else: "hero-star"}
-        class="w-8 h-8 bg-yellow-400 -mt-1.5 cursor-pointer"
-      />
+    <span phx-click={@event} data-id={@artist_id} class="ml-3 inline-block">
+      <.icon name={if @on, do: "hero-star-solid", else: "hero-star"} class="w-8 h-8 bg-yellow-400 -mt-1.5 cursor-pointer" />
     </span>
+    """
+  end
+
+  def updated_by(assigns) do
+    ~H"""
+    <div class="italic text-xs text-slate-500 my-5">
+      Last updated by: <.user_with_avatar user={@record.updated_by} />, {time_ago_in_words(@record.updated_at)}
+    </div>
+    """
+  end
+
+  def user_with_avatar(%{user: %{username: _}} = assigns) do
+    ~H"""
+    <.avatar user={@user} class="align-middle" />
+    <strong>{@user.username}</strong>
+    """
+  end
+
+  def user_with_avatar(assigns) do
+    ~H"""
+    unknown
     """
   end
 
@@ -165,7 +176,21 @@ defmodule TunezWeb.Artists.ShowLive do
     {:noreply, socket}
   end
 
-  def handle_event("destroy-album", _params, socket) do
+  def handle_event("destroy-album", %{"id" => album_id}, socket) do
+    socket =
+      case Tunez.Music.destroy_album(album_id) do
+        :ok ->
+          socket
+          |> update(:artist, fn artist ->
+            Map.replace!(artist, :albums, Enum.reject(artist.albums, &(&1.id == album_id)))
+          end)
+          |> put_flash(:info, "Album deleted successfully")
+
+        {:error, error} ->
+          Logger.info("Could not delete album '#{album_id}': #{inspect(error)}")
+          put_flash(socket, :error, "Could not delete album")
+      end
+
     {:noreply, socket}
   end
 

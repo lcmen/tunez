@@ -47,7 +47,7 @@ defmodule TunezWeb.Artists.FormLive do
       case AshPhoenix.Form.submit(socket.assigns.form, params: form_data) do
         {:ok, artist} ->
           socket
-          |> put_flash(:info, "Artist created successfully.")
+          |> put_flash(:info, "Artist saved successfully.")
           |> push_navigate(to: "/artists/#{artist.id}")
 
         {:error, form} ->

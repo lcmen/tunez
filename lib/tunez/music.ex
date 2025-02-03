@@ -9,5 +9,12 @@ defmodule Tunez.Music do
       define :read_artist, action: :read, get_by: :id
       define :update_artist, action: :update
     end
+
+    resource Tunez.Music.Album do
+      define :create_album, action: :create
+      define :update_album, action: :update
+      define :destroy_album, action: :destroy
+      define :read_album, action: :read, get_by: :id
+    end
   end
 end

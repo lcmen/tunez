@@ -59,17 +59,9 @@ defmodule TunezWeb.CoreComponents do
       {@rest}
     >
       <div class="grid grid-flow-cols grid-cols-[auto_minmax(auto,1fr)] justify-items-start text-start gap-2 items-center">
-        <.icon
-          :if={@kind == :error}
-          name="hero-exclamation-circle-mini"
-          class="w-6 h-6 text-error-600"
-        />
+        <.icon :if={@kind == :error} name="hero-exclamation-circle-mini" class="w-6 h-6 text-error-600" />
         <.icon :if={@kind == :info} name="hero-check-circle-mini" class="w-6 h-6 text-green-600" />
-        <.icon
-          :if={@kind == :warning}
-          name="hero-exclamation-circle-mini"
-          class="w-6 h-6 text-yellow-500"
-        />
+        <.icon :if={@kind == :warning} name="hero-exclamation-circle-mini" class="w-6 h-6 text-yellow-500" />
         <div>
           <p :if={@title} class="font-semibold text-sm">{@title}</p>
           <p class="text-sm">{msg}</p>
@@ -331,8 +323,7 @@ defmodule TunezWeb.CoreComponents do
     values: ~w(checkbox color date datetime-local email file month number password
                range search select tel text textarea time url week)
 
-  attr :field, Phoenix.HTML.FormField,
-    doc: "a form field struct retrieved from the form, for example: @form[:email]"
+  attr :field, Phoenix.HTML.FormField, doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
   attr :errors, :list, default: []
   attr :checked, :boolean, doc: "the checked flag for checkbox inputs"
@@ -340,8 +331,7 @@ defmodule TunezWeb.CoreComponents do
   attr :options, :list, doc: "the options to pass to Phoenix.HTML.Form.options_for_select/2"
   attr :multiple, :boolean, default: false, doc: "the multiple flag for select inputs"
 
-  attr :rest, :global,
-    include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
+  attr :rest, :global, include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
                 multiple pattern placeholder readonly required rows size step)
 
   def input(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
@@ -572,10 +562,8 @@ defmodule TunezWeb.CoreComponents do
     assigns = assign(assigns, :seed, avatar_seed(assigns.user))
 
     ~H"""
-    <img
-      class={["rounded-full size-8", @class]}
-      src={"https://api.dicebear.com/9.x/shapes/svg?seed=#{@seed}"}
-    />
+    <img class={["rounded-full size-8", @class]} src={"https://api.dicebear.com/9.x/shapes/svg?seed=#{@seed}"} />
+    <div class={["mask mask-circle size-8", @class]} phx-hook="avatar" id={"avatar_#{@seed}"} data-seed={@seed}></div>
     """
   end
 
@@ -631,12 +619,10 @@ defmodule TunezWeb.CoreComponents do
       to: selector,
       time: 300,
       in:
-        {"transition-all transform ease-out duration-300",
-         "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95",
+        {"transition-all transform ease-out duration-300", "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95",
          "opacity-100 translate-y-0 sm:scale-100"},
       out:
-        {"transition-all transform ease-in duration-200",
-         "opacity-100 translate-y-0 sm:scale-100",
+        {"transition-all transform ease-in duration-200", "opacity-100 translate-y-0 sm:scale-100",
          "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"}
     )
   end
@@ -646,8 +632,7 @@ defmodule TunezWeb.CoreComponents do
       to: selector,
       time: 300,
       transition:
-        {"transition-all transform ease-out duration-300",
-         "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95",
+        {"transition-all transform ease-out duration-300", "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95",
          "opacity-100 translate-y-0 sm:scale-100"}
     )
   end
@@ -657,8 +642,7 @@ defmodule TunezWeb.CoreComponents do
       to: selector,
       time: 200,
       transition:
-        {"transition-all transform ease-in duration-200",
-         "opacity-100 translate-y-0 sm:scale-100",
+        {"transition-all transform ease-in duration-200", "opacity-100 translate-y-0 sm:scale-100",
          "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"}
     )
   end
