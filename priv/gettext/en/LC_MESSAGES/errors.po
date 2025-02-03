@@ -110,3 +110,9 @@ msgstr ""
 
 msgid "must be equal to %{number}"
 msgstr ""
+
+msgid "must be valid url"
+msgstr ""
+
+msgid "already exists"
+msgstr ""
