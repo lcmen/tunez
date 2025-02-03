@@ -10,8 +10,9 @@ You'll also need NodeJS installed for managing JavaScript dependencies - we don'
 
 Once you have those installed:
 
-* Run `npm install --prefix assets` to install JavaScript dependencies
-* Run `mix setup` to install and setup Elixir dependencies
-* Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
+- Run `npm install --prefix assets` to install JavaScript dependencies
+- Run `mix setup` to install and setup Elixir dependencies
+- Run `mix phx.seed` to seed the database
+- Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
 
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.

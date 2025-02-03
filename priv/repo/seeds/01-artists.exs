@@ -20,5 +20,4 @@ else
 end
 
 # And re-insert fresh copies of them
-data
-|> Ash.bulk_create!(Tunez.Music.Artist, :create, return_errors?: true, authorize?: false)
+Ash.bulk_create!(data, Tunez.Music.Artist, :create, return_errors?: true, authorize?: false)
