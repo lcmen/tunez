@@ -59,6 +59,8 @@ defmodule Tunez.Music.Album do
 
   calculations do
     calculate :lowercase_name, :string, expr(string_downcase(name))
+    calculate :years_ago, :integer, expr(fragment("date_part('year', now()) - ?", year))
+    calculate :years_ago_string, :string, expr("Released " <> years_ago <> " years ago")
   end
 
   identities do
