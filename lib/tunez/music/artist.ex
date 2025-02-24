@@ -5,6 +5,10 @@ defmodule Tunez.Music.Artist do
   postgres do
     table "artists"
     repo Tunez.Repo
+
+    custom_indexes do
+      index "name gin_trgm_ops", name: "artists_name_index", using: "GIN"
+    end
   end
 
   actions do
@@ -20,6 +24,17 @@ defmodule Tunez.Music.Artist do
 
     read :read do
       primary? true
+    end
+
+    read :search do
+      argument :query, :ci_string do
+        constraints allow_empty?: true
+        default ""
+      end
+
+      filter expr(contains(name, ^arg(:query)))
+
+      pagination offset?: true, default_limit: 8
     end
 
     update :update do
@@ -54,6 +69,7 @@ defmodule Tunez.Music.Artist do
 
     attribute :name, :string do
       allow_nil? false
+      public? true
     end
 
     attribute :previous_names, {:array, :string} do
@@ -62,11 +78,25 @@ defmodule Tunez.Music.Artist do
 
     attribute :biography, :string
 
-    create_timestamp :created_at
-    update_timestamp :updated_at
+    create_timestamp :created_at, public?: true
+    update_timestamp :updated_at, public?: true
   end
 
   relationships do
     has_many :albums, Tunez.Music.Album, sort: [year: :desc]
+  end
+
+  aggregates do
+    count :albums_count, :albums do
+      public? true
+    end
+
+    first :image_url, :albums, :image_url do
+      public? true
+    end
+
+    first :latest_album_year, :albums, :year do
+      public? true
+    end
   end
 end
