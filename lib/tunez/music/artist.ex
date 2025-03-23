@@ -1,6 +1,23 @@
 defmodule Tunez.Music.Artist do
-  use Ash.Resource, otp_app: :tunez, domain: Tunez.Music, data_layer: AshPostgres.DataLayer
+  use Ash.Resource,
+    otp_app: :tunez,
+    domain: Tunez.Music,
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshGraphql.Resource, AshJsonApi.Resource]
+
   require Ash.Sort
+
+  graphql do
+    type :artist
+    filterable_fields [:albums_count, :inserted_at, :latest_album_year, :updated_at]
+  end
+
+  json_api do
+    default_fields [:id, :name, :biography, :albums_count, :image_url, :latest_album_year]
+    includes [:albums]
+    type "artist"
+    derive_filter? false
+  end
 
   postgres do
     table "artists"
@@ -9,6 +26,10 @@ defmodule Tunez.Music.Artist do
     custom_indexes do
       index "name gin_trgm_ops", name: "artists_name_index", using: "GIN"
     end
+  end
+
+  resource do
+    description "A person or group of people that makes and releases music."
   end
 
   actions do
@@ -27,7 +48,11 @@ defmodule Tunez.Music.Artist do
     end
 
     read :search do
+      description "List Artists, optionally filtering by name."
+
       argument :query, :ci_string do
+        description "Return only artists with names including the given value."
+
         constraints allow_empty?: true
         default ""
       end
@@ -74,16 +99,22 @@ defmodule Tunez.Music.Artist do
 
     attribute :previous_names, {:array, :string} do
       default []
+      public? true
     end
 
-    attribute :biography, :string
+    attribute :biography, :string do
+      public? true
+    end
 
     create_timestamp :created_at, public?: true
     update_timestamp :updated_at, public?: true
   end
 
   relationships do
-    has_many :albums, Tunez.Music.Album, sort: [year: :desc]
+    has_many :albums, Tunez.Music.Album do
+      sort year: :desc
+      public? true
+    end
   end
 
   aggregates do
