@@ -563,7 +563,6 @@ defmodule TunezWeb.CoreComponents do
 
     ~H"""
     <img class={["rounded-full size-8", @class]} src={"https://api.dicebear.com/9.x/shapes/svg?seed=#{@seed}"} />
-    <div class={["mask mask-circle size-8", @class]} phx-hook="avatar" id={"avatar_#{@seed}"} data-seed={@seed}></div>
     """
   end
 

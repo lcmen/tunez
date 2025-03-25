@@ -19,14 +19,7 @@ defmodule TunezWeb.Artists.FormLive do
         <.h1>{@page_title}</.h1>
       </.header>
 
-      <.simple_form
-        :let={form}
-        id="artist_form"
-        as={:form}
-        for={@form}
-        phx-change="validate"
-        phx-submit="save"
-      >
+      <.simple_form :let={form} id="artist_form" as={:form} for={@form} phx-change="validate" phx-submit="save">
         <.input field={form[:name]} label="Name" />
         <.input field={form[:biography]} type="textarea" label="Biography" />
         <:actions>

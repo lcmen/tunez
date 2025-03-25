@@ -65,13 +65,7 @@ defmodule TunezWeb.Albums.FormLive do
               <.input field={track_form[:duration_seconds]} />
             </td>
             <td class="w-12">
-              <.button_link
-                phx-click="remove-track"
-                phx-value-path={track_form.name}
-                kind="error"
-                size="xs"
-                inverse
-              >
+              <.button_link phx-click="remove-track" phx-value-path={track_form.name} kind="error" size="xs" inverse>
                 <span class="hidden">Delete</span>
                 <.icon name="hero-trash" class="size-5" />
               </.button_link>
