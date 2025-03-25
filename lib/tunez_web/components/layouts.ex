@@ -19,13 +19,7 @@ defmodule TunezWeb.Layouts do
         <.live_component module={TunezWeb.Notifications} id={:notifications} notifications={[]} />
 
         <div class="!ml-8">
-          <div
-            tabindex="0"
-            role="button"
-            class="pr-0"
-            phx-click={toggle("#user-menu")}
-            phx-click-away={hide("#user-menu")}
-          >
+          <div tabindex="0" role="button" class="pr-0" phx-click={toggle("#user-menu")} phx-click-away={hide("#user-menu")}>
             <.avatar user={@current_user} />
           </div>
           <ul

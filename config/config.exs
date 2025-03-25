@@ -22,6 +22,8 @@ config :spark,
     remove_parens?: true,
     "Ash.Resource": [
       section_order: [
+        :authentication,
+        :tokens,
         :graphql,
         :json_api,
         :postgres,
@@ -47,7 +49,7 @@ config :spark,
 config :tunez,
   ecto_repos: [Tunez.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [Tunez.Music]
+  ash_domains: [Tunez.Accounts, Tunez.Music]
 
 # Configures the endpoint
 config :tunez, TunezWeb.Endpoint,
