@@ -1,8 +1,10 @@
 defmodule TunezWeb.Albums.FormLive do
   use TunezWeb, :live_view
 
+  on_mount {TunezWeb.LiveUserAuth, role_required: [:admin, :editor]}
+
   def mount(params, _session, socket) do
-    {form, artist} = form_for(params)
+    {form, artist} = form_for(params, socket)
 
     socket =
       socket
@@ -115,20 +117,26 @@ defmodule TunezWeb.Albums.FormLive do
     {:noreply, socket}
   end
 
-  defp form_for(%{"id" => album_id}) do
-    album = Tunez.Music.read_album!(album_id, load: [:artist])
-    {Tunez.Music.form_to_update_album(album), album.artist}
+  defp form_for(%{"id" => album_id}, %{assigns: %{current_user: current_user}}) do
+    album = Tunez.Music.read_album!(album_id, actor: current_user, load: [:artist])
+    form =
+      Tunez.Music.form_to_update_album(album, actor: current_user)
+      |> AshPhoenix.Form.ensure_can_submit!()
+
+    {form, album.artist}
   end
 
-  defp form_for(%{"artist_id" => artist_id}) do
-    artist = Tunez.Music.read_artist!(artist_id)
+  defp form_for(%{"artist_id" => artist_id}, %{assigns: %{current_user: current_user}}) do
+    artist = Tunez.Music.read_artist!(artist_id, actor: current_user)
 
     form =
       Tunez.Music.form_to_create_album(
+        actor: current_user,
         transform_params: fn _form, params, _context ->
           Map.put(params, "artist_id", artist.id)
         end
       )
+      |> AshPhoenix.Form.ensure_can_submit!()
 
     {form, artist}
   end

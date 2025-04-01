@@ -3,13 +3,14 @@ defmodule Tunez.Music.Artist do
     otp_app: :tunez,
     domain: Tunez.Music,
     data_layer: AshPostgres.DataLayer,
-    extensions: [AshGraphql.Resource, AshJsonApi.Resource]
+    extensions: [AshGraphql.Resource, AshJsonApi.Resource],
+    authorizers: [Ash.Policy.Authorizer]
 
   require Ash.Sort
 
   graphql do
     type :artist
-    filterable_fields [:albums_count, :inserted_at, :latest_album_year, :updated_at]
+    filterable_fields [:albums_count, :created_at, :latest_album_year, :updated_at]
   end
 
   json_api do
@@ -25,6 +26,20 @@ defmodule Tunez.Music.Artist do
 
     custom_indexes do
       index "name gin_trgm_ops", name: "artists_name_index", using: "GIN"
+    end
+  end
+
+  policies do
+    bypass actor_attribute_equals(:role, :admin) do
+      authorize_if always()
+    end
+
+    policy action(:update) do
+      authorize_if actor_attribute_equals(:role, :editor)
+    end
+
+    policy action_type(:read) do
+      authorize_if always()
     end
   end
 
@@ -89,6 +104,12 @@ defmodule Tunez.Music.Artist do
     # default_accept [:name, :biography]
   end
 
+  changes do
+    change relate_actor(:created_by, allow_nil?: true), on: :create
+    change relate_actor(:updated_by, allow_nil?: true), on: :create
+    change relate_actor(:updated_by, allow_nil?: false), on: :update
+  end
+
   attributes do
     uuid_primary_key :id
 
@@ -111,6 +132,9 @@ defmodule Tunez.Music.Artist do
   end
 
   relationships do
+    belongs_to :created_by, Tunez.Accounts.User
+    belongs_to :updated_by, Tunez.Accounts.User
+
     has_many :albums, Tunez.Music.Album do
       sort year: :desc
       public? true

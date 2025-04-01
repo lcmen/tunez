@@ -3,7 +3,7 @@ defmodule Tunez.Accounts.User do
     otp_app: :tunez,
     domain: Tunez.Accounts,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshJsonApi.Resource, AshAuthentication],
+    extensions: [AshGraphql.Resource, AshJsonApi.Resource, AshAuthentication],
     data_layer: AshPostgres.DataLayer
 
   authentication do
@@ -19,6 +19,7 @@ defmodule Tunez.Accounts.User do
         require_interaction? true
         confirmed_at_field :confirmed_at
         auto_confirm_actions [:sign_in_with_magic_link, :reset_password_with_token]
+        require_interaction? true
         sender Tunez.Accounts.User.Senders.SendNewUserConfirmationEmail
       end
     end
@@ -50,6 +51,10 @@ defmodule Tunez.Accounts.User do
         sender Tunez.Accounts.User.Senders.SendMagicLinkEmail
       end
     end
+  end
+
+  graphql do
+    type :user
   end
 
   json_api do
@@ -232,6 +237,10 @@ defmodule Tunez.Accounts.User do
       change AshAuthentication.GenerateTokenChange
     end
 
+    update :set_role do
+      accept [:role]
+    end
+
     create :sign_in_with_magic_link do
       description "Sign in or register a user with magic link."
 
@@ -266,8 +275,17 @@ defmodule Tunez.Accounts.User do
       authorize_if always()
     end
 
-    policy always() do
-      forbid_if always()
+    policy action([:register_with_password, :sign_in_with_password]) do
+      authorize_if always()
+    end
+
+    policy action(:read) do
+      authorize_if expr(id == ^actor(:id))
+    end
+
+    policy action(:get_by_email) do
+      authorize_if expr(id == ^actor(:id))
+      authorize_if actor_attribute_equals(:role, :admin)
     end
   end
 
@@ -282,6 +300,15 @@ defmodule Tunez.Accounts.User do
     attribute :hashed_password, :string do
       sensitive? true
     end
+
+    attribute :role, Tunez.Accounts.Role do
+      allow_nil? false
+      default :user
+    end
+  end
+
+  calculations do
+    calculate :email_length, :integer, expr(fragment("length(?)", email))
   end
 
   identities do

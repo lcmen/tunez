@@ -46,7 +46,7 @@ defmodule Tunez.Music do
       define :read_artist, action: :read, get_by: :id
       define :update_artist, action: :update
 
-      define :search_artist,
+      define :search_artists,
         action: :search,
         args: [:query],
         default_options: [load: [:albums_count, :latest_album_year, :image_url]]

@@ -1,8 +1,10 @@
 defmodule TunezWeb.Artists.FormLive do
   use TunezWeb, :live_view
 
+  on_mount {TunezWeb.LiveUserAuth, role_required: [:admin, :editor]}
+
   def mount(params, _session, socket) do
-    form = form_for(params)
+    form = form_for(params, socket)
 
     socket =
       socket
@@ -52,12 +54,14 @@ defmodule TunezWeb.Artists.FormLive do
     {:noreply, socket}
   end
 
-  defp form_for(%{"id" => artist_id}) do
-    artist = Tunez.Music.read_artist!(artist_id)
-    Tunez.Music.form_to_update_artist(artist)
+  defp form_for(%{"id" => artist_id}, %{assigns: %{current_user: current_user}}) do
+    artist = Tunez.Music.read_artist!(artist_id, actor: current_user)
+    Tunez.Music.form_to_update_artist(artist, actor: current_user)
+    |> AshPhoenix.Form.ensure_can_submit!()
   end
 
-  defp form_for(_) do
-    Tunez.Music.form_to_create_artist()
+  defp form_for(_, %{assigns: %{current_user: current_user}}) do
+    Tunez.Music.form_to_create_artist(actor: current_user)
+    |> AshPhoenix.Form.ensure_can_submit!()
   end
 end
