@@ -6,6 +6,11 @@ defmodule Tunez.Repo do
     model |> Ecto.Query.first() |> one()
   end
 
+  @spec last(Ash.Resource.t()) :: Ash.Resource.t() | nil
+  def last(model) do
+    model |> Ecto.Query.last() |> one()
+  end
+
   def installed_extensions do
     # Add extensions here, and the migration generator will install them.
     ["ash-functions", "pg_trgm", "citext"]
