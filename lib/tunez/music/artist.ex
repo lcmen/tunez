@@ -15,7 +15,7 @@ defmodule Tunez.Music.Artist do
 
   json_api do
     default_fields [:id, :name, :biography, :albums_count, :image_url, :latest_album_year]
-    includes [:albums]
+    includes albums: [:tracks]
     type "artist"
     derive_filter? false
   end
@@ -26,20 +26,6 @@ defmodule Tunez.Music.Artist do
 
     custom_indexes do
       index "name gin_trgm_ops", name: "artists_name_index", using: "GIN"
-    end
-  end
-
-  policies do
-    bypass actor_attribute_equals(:role, :admin) do
-      authorize_if always()
-    end
-
-    policy action(:update) do
-      authorize_if actor_attribute_equals(:role, :editor)
-    end
-
-    policy action_type(:read) do
-      authorize_if always()
     end
   end
 
@@ -102,6 +88,20 @@ defmodule Tunez.Music.Artist do
     # or you can use default actions via:
     # defaults [:create, :read, :update, :destroy]
     # default_accept [:name, :biography]
+  end
+
+  policies do
+    bypass actor_attribute_equals(:role, :admin) do
+      authorize_if always()
+    end
+
+    policy action(:update) do
+      authorize_if actor_attribute_equals(:role, :editor)
+    end
+
+    policy action_type(:read) do
+      authorize_if always()
+    end
   end
 
   changes do

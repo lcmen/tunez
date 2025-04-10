@@ -46,6 +46,7 @@ defmodule TunezWeb.LiveUserAuth do
         socket
         |> Phoenix.LiveView.put_flash(:error, "Unauthorized")
         |> Phoenix.LiveView.redirect(to: ~p"/")
+
       {:halt, socket}
     end
   end

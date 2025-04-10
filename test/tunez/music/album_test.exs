@@ -154,14 +154,13 @@ defmodule Tunez.Music.AlbumTest do
       refute Music.can_update_album?(users.editor, cant_edit)
     end
 
-    @tag skip: "Also uncomment the `setup_users` function above"
     test "editors can delete albums that they created" do
-      # users = setup_users()
-      # can_delete = generate(album(seed?: true, created_by: users.editor))
-      # cant_delete = generate(album(seed?: true, created_by: users.admin))
+      users = setup_users()
+      can_delete = generate(album(seed?: true, created_by: users.editor))
+      cant_delete = generate(album(seed?: true, created_by: users.admin))
 
-      # assert Music.can_destroy_album?(users.editor, can_delete)
-      # refute Music.can_destroy_album?(users.editor, cant_delete)
+      assert Music.can_destroy_album?(users.editor, can_delete)
+      refute Music.can_destroy_album?(users.editor, cant_delete)
     end
   end
 
@@ -177,12 +176,15 @@ defmodule Tunez.Music.AlbumTest do
 
       # Using `assert_raise`
       next_year = Date.utc_today().year + 1
-      assert_raise Ash.Error.Invalid, ~r/must be greater than 1950 and must be less than or equal to #{next_year}/, fn ->
-        Music.create_album!(
-          %{artist_id: artist.id, name: "test 1925", year: 1925},
-          actor: admin
-        )
-      end
+
+      assert_raise Ash.Error.Invalid,
+                   ~r/must be greater than 1950 and must be less than or equal to #{next_year}/,
+                   fn ->
+                     Music.create_album!(
+                       %{artist_id: artist.id, name: "test 1925", year: 1925},
+                       actor: admin
+                     )
+                   end
 
       # Using `assert_has_error`
       # Also always test edge cases! Is 1950 included or excluded?

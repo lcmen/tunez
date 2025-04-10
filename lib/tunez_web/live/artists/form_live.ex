@@ -56,6 +56,7 @@ defmodule TunezWeb.Artists.FormLive do
 
   defp form_for(%{"id" => artist_id}, %{assigns: %{current_user: current_user}}) do
     artist = Tunez.Music.read_artist!(artist_id, actor: current_user)
+
     Tunez.Music.form_to_update_artist(artist, actor: current_user)
     |> AshPhoenix.Form.ensure_can_submit!()
   end

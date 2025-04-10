@@ -58,5 +58,7 @@ defmodule Tunez.Music do
       define :destroy_album, action: :destroy
       define :read_album, action: :read, get_by: :id
     end
+
+    resource Tunez.Music.Track
   end
 end
