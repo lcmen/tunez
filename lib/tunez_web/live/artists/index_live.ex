@@ -15,9 +15,14 @@ defmodule TunezWeb.Artists.IndexLive do
     query = Map.get(params, "q", "")
     sort_by = Map.get(params, "sort_by", "name") |> validate_sort_by()
     page_params = AshPhoenix.LiveView.page_from_params(params, 8)
-    page = Tunez.Music.search_artists!(
-      query, actor: socket.assigns.current_user, page: page_params, query: [sort_input: sort_by]
-    )
+
+    page =
+      Tunez.Music.search_artists!(
+        query,
+        actor: socket.assigns.current_user,
+        page: page_params,
+        query: [sort_input: sort_by]
+      )
 
     socket =
       socket
