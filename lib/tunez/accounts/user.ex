@@ -19,7 +19,6 @@ defmodule Tunez.Accounts.User do
         require_interaction? true
         confirmed_at_field :confirmed_at
         auto_confirm_actions [:sign_in_with_magic_link, :reset_password_with_token]
-        require_interaction? true
         sender Tunez.Accounts.User.Senders.SendNewUserConfirmationEmail
       end
     end
