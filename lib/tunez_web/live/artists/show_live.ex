@@ -12,7 +12,7 @@ defmodule TunezWeb.Artists.ShowLive do
       Tunez.Music.read_artist!(
         artist_id,
         actor: socket.assigns.current_user,
-        load: [albums: [:duration, :tracks]]
+        load: [:followed_by_me, albums: [:duration, :tracks]]
       )
 
     socket =
@@ -29,6 +29,11 @@ defmodule TunezWeb.Artists.ShowLive do
       <.header>
         <.h1>
           {@artist.name}
+          <.follow_toggle
+            :if={Tunez.Music.can_follow_artist?(@current_user, @artist)}
+            artist_id={@artist.id}
+            on={@artist.followed_by_me}
+          />
         </.h1>
         <:subtitle :if={@artist.previous_names != []}>
           Previously known as: {Enum.join(@artist.previous_names, ", ")}
@@ -77,8 +82,7 @@ defmodule TunezWeb.Artists.ShowLive do
       <div class="flex-1">
         <.header class="pl-3 pr-2 !m-0">
           <.h2>
-            {@album.name} ({@album.year})
-            <span :if={@album.duration} class="text-base">({@album.duration})</span>
+            {@album.name} ({@album.year}) <span :if={@album.duration} class="text-base">({@album.duration})</span>
           </.h2>
           <:action :if={Tunez.Music.can_destroy_album?(@current_user, @album)}>
             <.button_link
@@ -133,6 +137,7 @@ defmodule TunezWeb.Artists.ShowLive do
     event =
       if assigns.on do
         JS.push("unfollow")
+        |> JS.transition("animate-spin")
       else
         JS.push("follow")
         |> JS.transition("animate-spin")
@@ -141,9 +146,9 @@ defmodule TunezWeb.Artists.ShowLive do
     assigns = assign(assigns, :event, event)
 
     ~H"""
-    <span phx-click={@event} data-id={@artist_id} class="ml-3 inline-block">
+    <button phx-click={@event} data-id={@artist_id} class="ml-3 inline-block">
       <.icon name={if @on, do: "hero-star-solid", else: "hero-star"} class="w-8 h-8 bg-yellow-400 -mt-1.5 cursor-pointer" />
-    </span>
+    </button>
     """
   end
 
@@ -205,10 +210,27 @@ defmodule TunezWeb.Artists.ShowLive do
   end
 
   def handle_event("follow", _params, socket) do
+    socket =
+      case Tunez.Music.follow_artist(socket.assigns.artist, actor: socket.assigns.current_user) do
+        {:ok, _} ->
+          update(socket, :artist, fn artist ->
+            %{artist | followed_by_me: true}
+          end)
+
+        {:error, _} ->
+          put_flash(socket, :error, "Could not follow artist")
+      end
+
     {:noreply, socket}
   end
 
   def handle_event("unfollow", _params, socket) do
+    socket =
+      case Tunez.Music.unfollow_artist(socket.assigns.artist, actor: socket.assigns.current_user) do
+        :ok -> update(socket, :artist, &%{&1 | followed_by_me: false})
+        {:error, _} -> put_flash(socket, :error, "Could not unfollow artist")
+      end
+
     {:noreply, socket}
   end
 end

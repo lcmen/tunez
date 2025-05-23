@@ -69,6 +69,7 @@ defmodule TunezWeb.Artists.IndexLive do
     ~H"""
     <div id={"artist-#{@artist.id}"} data-role="artist-card" class="relative mb-2">
       <.link navigate={~p"/artists/#{@artist.id}"}>
+        <.follow_icon :if={@artist.followed_by_me} />
         <.cover_image image={@artist.image_url} />
       </.link>
     </div>
@@ -76,6 +77,7 @@ defmodule TunezWeb.Artists.IndexLive do
       <.link navigate={~p"/artists/#{@artist.id}"} class="text-lg font-semibold" data-role="artist-name">
         {@artist.name}
       </.link>
+      <.follower_count_display count={@artist.followers_count} />
     </p>
     <.artist_card_album_info artist={@artist} />
     """
@@ -100,11 +102,7 @@ defmodule TunezWeb.Artists.IndexLive do
 
   def follower_count_display(assigns) do
     ~H"""
-    <span
-      :if={@count > 0}
-      data-role="follower-count"
-      class="text-zinc-500 text-sm whitespace-nowrap pt-1 pl-1"
-    >
+    <span :if={@count > 0} data-role="follower-count" class="text-zinc-500 text-sm whitespace-nowrap pt-1 pl-1">
       <.icon name="hero-star" class="size-4 -mt-0.5" /> {round_count(@count)}
     </span>
     """
@@ -191,7 +189,9 @@ defmodule TunezWeb.Artists.IndexLive do
       {"recently added", "-created_at"},
       {"name", "name"},
       {"albums count", "-albums_count"},
-      {"latest album year", "--latest_album_year"}
+      {"latest album year", "--latest_album_year"},
+      {"popularity", "-followers_count"},
+      {"followed first", "-followed_by_me"}
     ]
   end
 

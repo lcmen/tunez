@@ -306,6 +306,17 @@ defmodule Tunez.Accounts.User do
     end
   end
 
+  relationships do
+    has_many :artist_followers, Tunez.Music.ArtistFollower do
+      destination_attribute :follower_id
+    end
+
+    many_to_many :followed_artists, Tunez.Music.Artist do
+      join_relationship :artist_followers
+      source_attribute_on_join_resource :follower_id
+    end
+  end
+
   calculations do
     calculate :email_length, :integer, expr(fragment("length(?)", email))
   end

@@ -16,8 +16,7 @@ defmodule TunezWeb.NotificationsLive do
       >
         <.icon name="hero-bell-alert" class="w-8 h-8 bg-gray-400" />
         <span :if={@notifications != []} class="absolute flex h-3 w-3 top-0 right-0 mt-1 mr-1.5">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-error-600 opacity-75">
-          </span>
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-error-600 opacity-75"></span>
           <span class="relative inline-flex rounded-full h-3 w-3 bg-error-600"></span>
         </span>
       </div>
@@ -26,11 +25,7 @@ defmodule TunezWeb.NotificationsLive do
           <.icon name="hero-check-circle" class="w-8 h-8 bg-green-500" />
           <span class="text-sm px-2">No new notifications!</span>
         </div>
-        <ul
-          :if={@notifications != []}
-          tabindex="0"
-          class="p-2 shadow bg-white rounded-lg w-80 text-sm space-y-4"
-        >
+        <ul :if={@notifications != []} tabindex="0" class="p-2 shadow bg-white rounded-lg w-80 text-sm space-y-4">
           <li :for={notification <- @notifications}>
             <.link
               navigate={~p"/artists/#{notification.album.artist_id}/#album-#{notification.album_id}"}

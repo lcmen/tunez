@@ -22,7 +22,7 @@ defmodule TunezWeb.Albums.FormLive do
         <.h1>{@page_title}</.h1>
       </.header>
 
-      <.simple_form :let={form} id="album_form" as={:form} for={@form} phx-change="validate" phx-submit="save" >
+      <.simple_form :let={form} id="album_form" as={:form} for={@form} phx-change="validate" phx-submit="save">
         <.input name="artist_id" label="Artist" value="" disabled />
         <div class="sm:flex gap-8 space-y-8 md:space-y-0">
           <div class="sm:w-3/4"><.input field={form[:name]} label="Name" /></div>
@@ -31,7 +31,6 @@ defmodule TunezWeb.Albums.FormLive do
           </div>
         </div>
         <.input field={form[:image_url]} label="Cover Image URL" />
-
 
         <.track_inputs form={form} />
 

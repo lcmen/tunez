@@ -10,11 +10,11 @@ defmodule Tunez.Music.Artist do
 
   graphql do
     type :artist
-    filterable_fields [:albums_count, :created_at, :latest_album_year, :updated_at]
+    filterable_fields [:albums_count, :followers_count, :created_at, :latest_album_year, :updated_at]
   end
 
   json_api do
-    default_fields [:id, :name, :biography, :albums_count, :image_url, :latest_album_year]
+    default_fields [:id, :name, :biography, :albums_count, :followers_count, :image_url, :latest_album_year]
     includes albums: [:tracks]
     type "artist"
     derive_filter? false
@@ -139,10 +139,27 @@ defmodule Tunez.Music.Artist do
       sort year: :desc
       public? true
     end
+
+    has_many :artist_followers, Tunez.Music.ArtistFollower
+
+    many_to_many :followers, Tunez.Accounts.User do
+      join_relationship :artist_followers
+      destination_attribute_on_join_resource :follower_id
+    end
+  end
+
+  calculations do
+    calculate :followed_by_me, :boolean, expr(exists(artist_followers, follower_id == ^actor(:id))) do
+      public? true
+    end
   end
 
   aggregates do
     count :albums_count, :albums do
+      public? true
+    end
+
+    count :followers_count, :artist_followers do
       public? true
     end
 
